@@ -1,0 +1,78 @@
+// use prisma-8
+
+model User {
+  id           String     @id @onCreate(uuid())
+  email        String     @unique
+  name         String?
+  passwordHash String
+  role         String     @default("USER")
+  favorites    Favorite[]
+  createdAt    DateTime   @default(now())
+}
+
+model Category {
+  id     String   @id @onCreate(uuid())
+  name   String   @unique
+  slug   String   @unique
+  movies Movie[]
+  series Series[]
+}
+
+model Movie {
+  id          String     @id @onCreate(uuid())
+  title       String
+  slug        String     @unique
+  description String
+  posterUrl   String
+  backdropUrl String?
+  videoUrl    String
+  releaseYear Int
+  durationMin Int?
+  rating      Float?     @default(0)
+  featured    Boolean    @default(false)
+  categoryId  String
+  category    Category   @relation(fields: [categoryId], references: [id])
+  favorites   Favorite[]
+  createdAt   DateTime   @default(now())
+}
+
+model Series {
+  id          String     @id @onCreate(uuid())
+  title       String
+  slug        String     @unique
+  description String
+  posterUrl   String
+  backdropUrl String?
+  releaseYear Int
+  rating      Float?     @default(0)
+  featured    Boolean    @default(false)
+  categoryId  String
+  category    Category   @relation(fields: [categoryId], references: [id])
+  episodes    Episode[]
+  favorites   Favorite[]
+  createdAt   DateTime   @default(now())
+}
+
+model Episode {
+  id           String   @id @onCreate(uuid())
+  seasonNumber Int
+  episodeNum   Int
+  title        String
+  description  String?
+  videoUrl     String
+  durationMin  Int?
+  seriesId     String
+  series       Series   @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+}
+
+model Favorite {
+  id        String   @id @onCreate(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movieId   String?
+  movie     Movie?   @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  seriesId  String?
+  series    Series?  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
